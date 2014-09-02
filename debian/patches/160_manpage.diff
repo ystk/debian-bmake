@@ -1,0 +1,11 @@
+--- a/bmake.1
++++ b/bmake.1
+@@ -30,7 +30,7 @@
+ .\"	from: @(#)make.1	8.4 (Berkeley) 3/19/94
+ .\"
+ .Dd February 14, 2014
+-.Dt MAKE 1
++.Dt BMAKE 1
+ .Os
+ .Sh NAME
+ .Nm bmake

@@ -1,0 +1,46 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+ARCH=$(patsubst mips,mipseb,$(shell dpkg-architecture -qDEB_HOST_ARCH_CPU))
+MULTIARCH=$(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+MAKE_VERSION=$(shell sed -n '/^MAKE_VERSION=/s,.*=[^0-9]*,,p' Makefile)
+CFLAGS=$(shell dpkg-buildflags --get CFLAGS) \
+	-D__COPYRIGHT\(x\)= -D__RCSID\(x\)= \
+	-I. -DMACHINE=\\\"debian\\\" -DMACHINE_ARCH=\\\"${ARCH}\\\" \
+	-DMACHINE_MULTIARCH=\\\"${MULTIARCH}\\\" \
+	-DHAVE_CONFIG_H -DNEED_HOST_CDEFS_H -DMAKE_NATIVE \
+	-DUSE_META -D_PATH_DEFSYSPATH=\\\"/usr/share/mk\\\" \
+	-DMAKE_VERSION=\\\"${MAKE_VERSION}\\\" \
+	-Wno-unused
+
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+CROSS :=
+else
+CROSS := CC=$(DEB_HOST_GNU_TYPE)-gcc
+endif
+
+%:
+	dh $@ --with=autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --with-machine=debian
+
+override_dh_auto_build:
+	$(MAKE) -f Makefile.boot CFLAGS="$(CFLAGS) $(CPPFLAGS)" LIBS="$(LDFLAGS)" $(CROSS)
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+	$(MAKE) -f Makefile.boot clean
+
+override_dh_auto_install:
+	ln -s bmake pmake
+	groff -Tascii -ms PSD.doc/tutorial.ms > \
+	      PSD.doc/tutorial.asc
+	groff -Tps -ms PSD.doc/tutorial.ms > \
+	      PSD.doc/tutorial.ps
+
+.PHONY: override_dh_auto_configure override_dh_auto_build override_dh_auto_test override_dh_auto_clean override_dh_auto_install

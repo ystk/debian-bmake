@@ -1,0 +1,40 @@
+From: Thorsten Glaser <tg@mirbsd.de>
+
+Port to hurd-i386 (Closes: #547459)
+- make.h: define MAXPATHLEN if not defined (XXX kludge)
+- main.c: check sysconf(_PC_PATH_MAX) and bail out if larger than
+  the defined kludge value; inform the user appropriately.
+
+--- a/main.c
++++ b/main.c
+@@ -621,6 +621,17 @@
+ 
+ 	oldVars = TRUE;
+ 
++#ifdef MAXPATHLEN_UNDEFINED
++	if (sysconf(_PC_PATH_MAX) > MAXPATHLEN) {
++		fprintf(stderr, "This operating system runs with "
++		    "sysconf(_PC_PATH_MAX) > MAXPATHLEN\n(%ld > %ld). "
++		    "Please change the guesstimated value at the bottom\n"
++		    "of 'make.h' and recompile, or reduce the actual "
++		    "value.\n", sysconf(_PC_PATH_MAX), (long)MAXPATHLEN);
++		return (255);
++	}
++#endif
++
+ 	/*
+ 	 * See if the rest of the arguments are variable assignments and
+ 	 * perform them if so. Else take them to be targets and stuff them
+--- a/make.h
++++ b/make.h
+@@ -522,4 +522,10 @@
+ #define MAXPATHLEN BMAKE_PATH_MAX
+ #endif
+ 
++/* maybe Debian GNU/HURD */
++#ifndef MAXPATHLEN
++#define MAXPATHLEN	4096	/* some sensible value */
++#define MAXPATHLEN_UNDEFINED	/* triggers check in main.c */
++#endif
++
+ #endif /* _MAKE_H_ */

@@ -1,0 +1,130 @@
+From: Guillem Jover <guillem@debian.org>
+
+Multiarch support.
+
+The pmake system makefiles hardcode several standard library paths,
+which will make other programs break due to those being located in
+a different place on multiarch.
+
+--- a/arch.c
++++ b/arch.c
+@@ -167,15 +167,6 @@
+ #include    "hash.h"
+ #include    "dir.h"
+ 
+-#ifdef TARGET_MACHINE
+-#undef MAKE_MACHINE
+-#define MAKE_MACHINE TARGET_MACHINE
+-#endif
+-#ifdef TARGET_MACHINE_ARCH
+-#undef MAKE_MACHINE_ARCH
+-#define MAKE_MACHINE_ARCH TARGET_MACHINE_ARCH
+-#endif
+-
+ static Lst	  archives;   /* Lst of archives we've already examined */
+ 
+ typedef struct Arch {
+--- a/main.c
++++ b/main.c
+@@ -152,6 +152,19 @@
+ # define __arraycount(__x)	(sizeof(__x) / sizeof(__x[0]))
+ #endif
+ 
++#ifdef TARGET_MACHINE
++#undef MAKE_MACHINE
++#define MAKE_MACHINE TARGET_MACHINE
++#endif
++#ifdef TARGET_MACHINE_ARCH
++#undef MAKE_MACHINE_ARCH
++#define MAKE_MACHINE_ARCH TARGET_MACHINE_ARCH
++#endif
++#ifdef TARGET_MACHINE_MULTIARCH
++#undef MAKE_MACHINE_MULTIARCH
++#define MAKE_MACHINE_MULTIARCH TARGET_MACHINE_MULTIARCH
++#endif
++
+ Lst			create;		/* Targets to be made */
+ time_t			now;		/* Time at start of make */
+ GNode			*DEFAULT;	/* .DEFAULT node */
+@@ -861,6 +874,7 @@
+     	const char *machine = getenv("MACHINE");
+ #endif
+ 	const char *machine_arch = getenv("MACHINE_ARCH");
++	const char *machine_multiarch = getenv("MACHINE_MULTIARCH");
+ 	char *syspath = getenv("MAKESYSPATH");
+ 	Lst sysMkPath;			/* Path of sys.mk */
+ 	char *cp = NULL, *start;
+@@ -912,8 +926,8 @@
+ 	 * so we can share an executable for similar machines.
+ 	 * (i.e. m68k: amiga hp300, mac68k, sun3, ...)
+ 	 *
+-	 * Note that both MACHINE and MACHINE_ARCH are decided at
+-	 * run-time.
++	 * Note that all of MACHINE, MACHINE_ARCH and MACHINE_MULTIARCH
++	 * are decided at run-time.
+ 	 */
+ 	if (!machine) {
+ #ifdef MAKE_NATIVE
+@@ -956,6 +970,18 @@
+ 
+ 	myPid = getpid();		/* remember this for vFork() */
+ 
++	if (!machine_multiarch) {
++#ifndef MACHINE_MULTIARCH
++#ifdef MAKE_MACHINE_MULTIARCH
++	    machine_multiarch = MAKE_MACHINE_MULTIARCH;
++#else
++	    machine_multiarch = "unknown-unknown-unknown";
++#endif
++#else
++	    machine_multiarch = MACHINE_MULTIARCH;
++#endif
++	}
++
+ 	/*
+ 	 * Just in case MAKEOBJDIR wants us to do something tricky.
+ 	 */
+@@ -964,6 +990,7 @@
+ 	Var_Set(".MAKE.OS", utsname.sysname, VAR_GLOBAL, 0);
+ 	Var_Set("MACHINE", machine, VAR_GLOBAL, 0);
+ 	Var_Set("MACHINE_ARCH", machine_arch, VAR_GLOBAL, 0);
++	Var_Set("MACHINE_MULTIARCH", machine_multiarch, VAR_GLOBAL, 0);
+ #ifdef MAKE_VERSION
+ 	Var_Set("MAKE_VERSION", MAKE_VERSION, VAR_GLOBAL, 0);
+ #endif
+--- a/bmake.1
++++ b/bmake.1
+@@ -2087,6 +2087,7 @@
+ uses the following environment variables, if they exist:
+ .Ev MACHINE ,
+ .Ev MACHINE_ARCH ,
++.Ev MACHINE_MULTIARCH ,
+ .Ev MAKE ,
+ .Ev MAKEFLAGS ,
+ .Ev MAKEOBJDIR ,
+--- a/Makefile.boot
++++ b/Makefile.boot
+@@ -4,7 +4,8 @@
+ #
+ # You only want to use this if you aren't running NetBSD.
+ #
+-# modify MACHINE and MACHINE_ARCH as appropriate for your target architecture
++# modify MACHINE, MACHINE_ARCH and MACHINE_MULTIARCH as appropriate for
++# your target architecture
+ #
+ CC=gcc -O -g
+ 
+@@ -13,11 +14,13 @@
+ 
+ MACHINE=i386
+ MACHINE_ARCH=i386
++MACHINE_MULTIARCH=i386-linux-gnu
+ # tested on HP-UX 10.20
+ #MAKE_MACHINE=hp700
+ #MAKE_MACHINE_ARCH=hppa
+ CFLAGS= -DTARGET_MACHINE=\"${MACHINE}\" \
+ 	-DTARGET_MACHINE_ARCH=\"${MACHINE_ARCH}\" \
++	-DTARGET_MACHINE_MULTIARCH=\"${MACHINE_MULTIARCH}\" \
+ 	-DMAKE_MACHINE=\"${MACHINE}\"
+ LIBS=
+ 

@@ -1,0 +1,11 @@
+pmake
+Makefile.config
+config.h
+config.log
+config.status
+make-bootstrap.sh
+makefile
+unit-tests/Makefile
+unit-tests/test.*
+PSD.doc/tutorial.asc
+PSD.doc/tutorial.ps

@@ -1,0 +1,31 @@
+Source: bmake
+Section: devel
+Priority: optional
+Maintainer: Andrew Shadura <andrewsh@debian.org>
+Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 9), groff, dh-autoreconf
+Homepage: http://www.crufty.net/help/sjg/bmake.html
+
+Package: bmake
+Architecture: any
+Multi-Arch: foreign
+Replaces: pmake
+Provides: pmake
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: NetBSD make
+ bmake is a program designed to simplify the maintenance of other
+ programs. Its input is a list of specifications as to the files upon
+ which programs and other files depend.  mkdep, a program to construct
+ Makefile dependency lists, is also included.
+ .
+ bmake is a port of the NetBSD make tool.
+
+Package: pmake
+Architecture: all
+Depends: bmake, ${misc:Depends}
+Description: NetBSD make (transitional package)
+ This is a dummy package to aid in transitioning from pmake package
+ to the new bmake package.
+ .
+ This dummy package may be safely removed after upgrading.
+

@@ -1,0 +1,3 @@
+bmake pmake debian/mkdep usr/bin
+debian/mk/* usr/share/mk/
+debian/bmake.pm usr/share/perl5/Debian/Debhelper/Buildsystem/
