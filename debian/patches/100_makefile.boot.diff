@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/Makefile.boot
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,48 @@
 +#	$NetBSD: Makefile.boot,v 1.17 2004/05/07 00:04:38 ross Exp $
 +#
 +# a very simple makefile...
@@ -11,8 +11,10 @@
 +#
 +CC=gcc -O -g
 +
++-include Makefile.config
++
 +.c.o:
-+	${CC} ${CFLAGS} -c $< -o $@
++	${CC} ${CFLAGS} ${CPPFLAGS} -c $< -o $@
 +
 +MACHINE=i386
 +MACHINE_ARCH=i386
@@ -40,7 +42,7 @@
 +
 +bmake: ${OBJ} ${LIBOBJ}
 +#	@echo 'make of make and make.0 started.'
-+	${CC} ${CFLAGS} ${OBJ} ${LIBOBJ} -o bmake ${LIBS}
++	${CC} ${LDFLAGS} ${OBJ} ${LIBOBJ} -o bmake ${LIBS}
 +	@ls -l $@
 +#	nroff -h -man make.1 > make.0
 +#	@echo 'make of make and make.0 completed.'

@@ -1,0 +1,18 @@
+From: Svante Signell <svante.signell@gmail.com>
+Subject: Handle ‘undefined’ in the getconf output
+
+--- a/configure.in.orig	2014-02-15 23:27:59.000000000 +0100
++++ b/configure.in	2014-09-16 09:18:10.000000000 +0200
+@@ -83,7 +83,11 @@
+ if test -x /usr/bin/getconf; then
+    bmake_path_max=`getconf PATH_MAX / 2> /dev/null`
+ fi
+-bmake_path_max=${bmake_path_max:-1024}
++if test "${bmake_path_max}" = "undefined" ; then
++   bmake_path_max=1024
++else
++   bmake_path_max=${bmake_path_max:-1024}
++fi
+ if test $bmake_path_max -gt 1024; then
+    # this is all we expect
+    bmake_path_max=1024

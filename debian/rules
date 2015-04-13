@@ -29,7 +29,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- --with-machine=debian
 
 override_dh_auto_build:
-	$(MAKE) -f Makefile.boot CFLAGS="$(CFLAGS) $(CPPFLAGS)" LIBS="$(LDFLAGS)" $(CROSS)
+	$(MAKE) -f Makefile.boot CFLAGS="$(CFLAGS)" $(CROSS)
 
 override_dh_auto_test:
 

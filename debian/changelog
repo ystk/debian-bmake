@@ -1,3 +1,16 @@
+bmake (20140620-3) unstable; urgency=medium
+
+  * Handle ‘undefined’ in the output of getconf (unbreaks Hurd build,
+    thanks to Svante Signell; closes: #761666).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 16 Sep 2014 22:16:11 +0200
+
+bmake (20140620-2) unstable; urgency=medium
+
+  * Fix build on Hurd, drop old hacks.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 15 Sep 2014 17:57:20 +0200
+
 bmake (20140620-1) unstable; urgency=medium
 
   * New upstream release.
